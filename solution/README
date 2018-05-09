@@ -1,6 +1,0 @@
-# Run the application - the program will wait for input on stdin
-python csdc.py
-
-# Running the test program - takes a 'normal' text file as an argument
-python test_csdc.py <file>
-python test_csdc.py input/4.txt
