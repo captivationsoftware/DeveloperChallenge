@@ -7,6 +7,9 @@ with open('temp', 'w') as tempfile:
     with open(sys.argv[1]) as infile:
         for line in infile.readlines():
             for c in line:
+                # for every 'z', try to throw off the 8-bit sequence
+                if c == 'z':
+                    tempfile.write('1010')
                 binstr = format(ord(c), '08b')
                 tempfile.write(binstr)
 
