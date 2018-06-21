@@ -1,0 +1,13 @@
+{
+  "extends": "airbnb",
+  "rules": {
+    "import/no-named-as-default": "warn",
+    "import/no-named-as-default-member": "warn",
+    "no-use-before-define": "warn",
+    "padded-blocks": "warn",
+    "space-before-function-paren": "warn"
+  },
+  "env": {
+    "jest": true
+  }
+}
