@@ -1,21 +1,98 @@
-# Captivation Software Developer Challenge
+Musa Alam
+Captivation Software Developer Challenge
+https://github.com/captivationsoftware/DeveloperChallenge/#captivation-software-developer-challenge
 
-## Your Task
-Develop an application that:
-- Reads a stream of "bits" (a continuous string consisting only of the character '0' and '1') from STDIN,
-- Decodes input characters into a single, zero-padded ASCII equivalent (e.g. "01000011" decodes to 'C')
-- Searches the decoded message for the preamble string "CAPTIVATION", and once found, prints the next one hundred decoded characters to STDOUT
+REQUIREMENTS
+INSTALL Java version 8. https://java.com/en/download/help/linux_x64_install.xml
 
-## Rules
-- The input stream will only ever consist of combinations of the character '0' or '1', no input validation is required
-- The input stream is to be treated as if it is never-ending
-- Multiple preamble/message occurrences may occur within the same input stream
-- Preamble/message occurrences are not guaranteed to be well-aligned (e.g. an arbitrary number of "bits" may precede a preamble, not just a multiple of 8)
-- The number of '0' and '1' characters between each preamble/message occurrence is variable 
-- Nothing else should be printed to STDOUT, only the one hundred characters following the preamble string "CAPTIVATION"
+In linux, you can run the following command in terminal to install version 8:
 
-## Guidelines
-- This solution will be tested by an automated tool, so failure to adhere to this spec precisely will produce a failing result 
-- Your solution should include instructions on how to run/build via Linux command line (or even better, use Docker)
-- Your solution will be judged for correctness, performance, and style
-- You may use any language you'd like, but you can only use standard libraries
+sudo apt-get install openjdk-8-jdk
+
+HOW TO RUN
+
+After cloning the repo, navigate to the src folder. From there, run the first command to compile, and second to run the application:
+
+javac com/malam/CaptivationChallenge.java
+
+java com/malam/CaptivationChallenge
+
+The program will then expect input from the console. I used another program to convert common phrases to bits, then copied and pasted the result in the console for the program to decode.
+
+
+INPUT 1
+
+English: "Did you say CAPTIVATION?Seems like a good company to work for, CAPTIVATION"
+
+Binary: "100010001101001011001000010000001111001011011110111010100100000011100110110
+000101111001001000000100001101000001010100000101010001001001010101100100000101010100
+010010010100111101001110001111110101001101100101011001010110110101110011001000000110
+110001101001011010110110010100100000011000010010000001100111011011110110111101100100
+001000000110001101101111011011010111000001100001011011100111100100100000011101000110
+111100100000011101110110111101110010011010110010000001100110011011110111001000101100
+001000000100001101000001010100000101010001001001010101100100000101010100010010010100
+111101001110"
+
+
+OUTPUT 1
+
+"?Seems like a good company to work for, CAPTIVATION"
+
+
+INPUT 2
+
+English: "CAPTIVATION? I'd love to work for them!"
+
+Binary: "01000011010000010101000001010100010010010101011001000001010101000100100101001
+11101001110001111110010000001001001001001110110010000100000011011000110111101110110011
+00101001000000111010001101111001000000111011101101111011100100110101100100000011001100
+110111101110010001000000111010001101000011001010110110100100001"
+
+
+OUTPUT 2
+
+"? I'd love to work for them!"
+
+
+INPUT 3
+
+English: "CAPTIVATION"
+
+Binary: "0100001101000001010100000101010001001001010101100100000101010100010010010100111101001110"
+
+
+OUTPUT 3
+
+""
+
+
+INPUT 4
+
+English: "This time, we don't see Captivation in all caps, so nothing to print!"
+
+Binary: "101010001101000011010010111001100100000011101000110100101101101011001010010110000100000011
+101110110010100100000011001000110111101101110001001110111010000100000011100110110010101100101001000
+000100001101100001011100000111010001101001011101100110000101110100011010010110111101101110001000000
+110100101101110001000000110000101101100011011000010000001100011011000010111000001110011001011000010
+000001110011011011110010000001101110011011110111010001101000011010010110111001100111001000000111010
+00110111100100000011100000111001001101001011011100111010000100001"
+
+
+OUTPUT 4
+
+""
+
+
+INPUT 5
+
+English: "I really hope I get the job at CAPTIVATION SOFTWARE!"
+
+Binary: "10010010010000001110010011001010110000101101100011011000111100100100000011010000110111101110
+00001100101001000000100100100100000011001110110010101110100001000000111010001101000011001010010000001
+10101001101111011000100010000001100001011101000010000001000011010000010101000001010100010010010101011
+00100000101010100010010010100111101001110001000000101001101001111010001100101010001010111010000010101
+00100100010100100001"
+
+OUTPUT 5
+
+" SOFTWARE!"
