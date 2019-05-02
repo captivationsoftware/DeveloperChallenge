@@ -29,16 +29,17 @@ public class CaptivationChallenge {
             
             //Get eight binary numbers below from the input. Also check in place to not go past input length
             //which is not needed if input is infinite, but for testing it is.
-            for(int i = inputIndex; i < maxIterations && i < binaryInput.length(); i++) {
+            for(int i = inputIndex; i < maxIterations; i++) {
                 binaryLetter += binaryInput.charAt(i);
                 inputIndex++;   
             }
             
             //Not needed if input infinite, but for testing this was needed to avoid program breakage.
-            if(binaryLetter.length() < 8) { 
-                readInput = false;
-                continue;
-            }
+            //if(binaryLetter.length() < 8) { 
+            //    readInput = false;
+            //    continue;
+            //}
+            
             int charCode = Integer.parseInt(binaryLetter, 2); //Binary string to integer here
             convertedLetter = (char)charCode; //We have the letter here.
             
