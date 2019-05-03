@@ -11,11 +11,13 @@ sudo apt-get install openjdk-8-jdk
 
 HOW TO RUN
 
-After cloning the repo, navigate to the src folder. From there, run the first command to compile, and second to run the application:
+After cloning the repo, navigate to the src folder. From there, run the first command to compile, and second to run the application, with the input file name being args[0]:
+An example on how I ran it on my machine is shown below:
+
 
 javac com/malam/CaptivationChallenge.java
 
-java com/malam/CaptivationChallenge
+java com/malam/CaptivationChallenge C:\\Users\\musa-\\Documents\\testCases.txt
 
 The program will then expect input from the console. I used another program to convert common phrases to bits, then copied and pasted the result in the console for the program to decode.
 
