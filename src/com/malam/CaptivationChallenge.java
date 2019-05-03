@@ -1,70 +1,70 @@
 package com.malam;
 
-import java.util.Scanner;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 public class CaptivationChallenge {
-    
-    public static final int LETTERS_TO_PRINT = 100; //100 letters to print after finding preamble.
-    public static final String PREAMBLE = "CAPTIVATION"; //Preamble we're looking for
-    
-    public static void main(String [] args) {
-        
-        Scanner scanner = new Scanner(System.in);
-        
-        String binaryInput; //Input from Stdin
-        int letterPrintCount = 0;
-        boolean havePreamble = false;
-        int index = 0;
-        
-        int inputIndex = 0;
-        boolean readInput = true;
-        
-        binaryInput = scanner.nextLine();
-        while(readInput) {
-            
-            int maxIterations = inputIndex + 8; //Iterate 8 bits at a time.
-            
-            String binaryLetter = ""; //8 bit letter read from stdin
-            char convertedLetter; //binaryLetter converted text
-            
-            //Get eight binary numbers below from the input. Also check in place to not go past input length
-            //which is not needed if input is infinite, but for testing it is.
-            for(int i = inputIndex; i < maxIterations; i++) {
-                binaryLetter += binaryInput.charAt(i);
-                inputIndex++;   
-            }
-            
-            //Not needed if input infinite, but for testing this was needed to avoid program breakage.
-            //if(binaryLetter.length() < 8) { 
-            //    readInput = false;
-            //    continue;
-            //}
-            
-            int charCode = Integer.parseInt(binaryLetter, 2); //Binary string to integer here
-            convertedLetter = (char)charCode; //We have the letter here.
-            
-            //We have our preamble. Print out 100 chars after preamble.
-            if(havePreamble) {
-                System.out.print(convertedLetter);
-                letterPrintCount++;
-                //Kill loop if 100 chars have been printed.
-                if(letterPrintCount == LETTERS_TO_PRINT) {
-                    readInput = false;
-                }
-            }
-            //Next char or Preamble itself found in sequence. Index keeps track of preamble found status.
-            else if(convertedLetter == PREAMBLE.charAt(index)) {
-                index++;
-                if(index == PREAMBLE.length()) {
-                    havePreamble = true;
-                }
-            }
-            
-            //False start. Need to start again, but bit by bit, not multiple of 8. Reset index by 7 backspaces.
-            else {
-                index = 0;
-                inputIndex = inputIndex - 7;
-            }         
-        }   
-    }
+	
+	public static final int LETTERS_TO_PRINT = 100;
+	public static final String PREAMBLE = "CAPTIVATION";
+	
+	public static void main(String [] args) throws IOException {
+		
+		try {
+			RandomAccessFile testFile = new RandomAccessFile(args[0], "rw"); //Use random access file to manipulate indices
+			int letterPrintCount = 0; //Keep track of how many letters have been printed.
+			boolean havePreamble = false; 
+			int index = 0; //Compare input letter to letter in Preamble at specified Index.
+			
+			int inputIndex = 0; //Keep track of where you are reading the input itself.
+			boolean readInput = true;
+			
+			//reads input forever
+			while(readInput) {
+				
+				int maxIterations = inputIndex + 8; //Iterate 8 bits at a time.
+				
+				String binaryLetter = ""; //8 bit letter read from the file
+				char convertedLetter; //binaryLetter converted text
+				
+				//Get eight binary numbers below from the input file.
+				for(int i = inputIndex; i < maxIterations; i++) {
+					binaryLetter += (char)testFile.read(); //Only read one byte, instead of entire line
+					inputIndex++;
+				}
+		
+				int charCode = Integer.parseInt(binaryLetter, 2); //Binary string to integer here
+				convertedLetter = (char)charCode;//We have the letter here.
+				
+				if(havePreamble) {
+					System.out.print(convertedLetter);
+					letterPrintCount++;
+					//Reset havePreamble to false if 100 letters printed
+					if(letterPrintCount == LETTERS_TO_PRINT) {
+						havePreamble = false;
+						index = 0; //Reset index to find the preamble again
+						letterPrintCount = 0; //Reset letter count to 0;
+					}
+				}
+				//Next char or Preamble itslef found in sequence. Index keeps track of preamble found status.
+				else if(convertedLetter == PREAMBLE.charAt(index)) {
+					index++;
+					if(index == PREAMBLE.length()) {
+						havePreamble = true;
+					}
+				}
+				
+				//False start. Need to start again, but bit by bit, not multiple of 8. Reset index by 7 backspaces.
+				else {
+					index = 0;
+					inputIndex = inputIndex - 7;
+					testFile.seek(inputIndex); //Adjust 'head' on file by 7 backspaces.
+				}
+			}
+			
+		}catch (FileNotFoundException e) {
+			System.out.println("Please supply a valid file.");
+		}
+	}
 }
