@@ -58,7 +58,7 @@ def getMsg(base,stack):
                stack.put(msg)
                break
             elif len(buf) == 176:
-               buf = ""
+               buf = buf[+87:]
 
 #By default, reading from stdin is a blocking procedure. Rather than require
 #the start of this program in unblock mode or something exotic, let's just hijack
