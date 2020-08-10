@@ -1,4 +1,4 @@
-import sys,select,tty,termios,re
+import sys,select,tty,termios
 from queue import LifoQueue
 
 #Getter method for preamble.
@@ -26,11 +26,24 @@ def getMsg(base,stack):
     msg = ""
     #This is the main read loop of the program.
     while 1:
-        #
-        if not stack.empty() and base:
+        #To preserve order, I used a stack. However, to perfectly preserve order, you
+        #would need to process all messages and return to the base case to print. In
+        #certain applications, that might be fine, but in high-speed, high-output environments
+        #you might never return to your base case.
+
+        #As such, I implemented a max stack size of 10 and I print them out when the stack is 
+        #full. For these 10 messages, order is preserved. Beyond that, there is no guarantee of
+        #total order preservation. This is something that would be parameterized, provided user
+        #requirements indicated it was necessary or the client requests it.
+
+        #Additionally, I told it to print out if the stack is full OR if we are in the base. This
+        #guarantees that if we are at the end of a stream, have processed all our messages, and don't
+        #have a full stack, the remaining N messages are printed.
+        if stack.full() or base:
             while not stack.empty():
                 print(decode(stack.get()), file = sys.stdout, end = "")
                 sys.stdout.flush()
+                sys.stdin.flush()
         if isData():
             if base: buf += sys.stdin.read(1)
             else: msg += sys.stdin.read(1)
@@ -39,22 +52,25 @@ def getMsg(base,stack):
                msg = msg[:-88]
                getMsg(False,stack)
             elif preamble() in buf:
-               buf = ""
+               buf = buf[:-88]
                getMsg(False,stack)
             elif len(msg) == 800:
                stack.put(msg)
                break
+            elif len(buf) == 176:
+               buf = ""
 
 #By default, reading from stdin is a blocking procedure. Rather than require
 #the start of this program in unblock mode or something exotic, let's just hijack
 #the terminal and make it interactive. We save the old settings and restore them
 #when necessary.
 def unblockStdIn():
+    stackSize = 10
     old_settings = termios.tcgetattr(sys.stdin)
     try:
         tty.setcbreak(sys.stdin.fileno())
         #Our message stack.
-        stack = LifoQueue(maxsize=-1)
+        stack = LifoQueue(maxsize=stackSize)
         #Find the first preamble. The "True" argument is to specify this as the base
         #case. I wanted a totally recursive solution, and to avoid a helper method required
         #being able to know when you're in the base case because of the potential
