@@ -9,7 +9,7 @@ import sys
 import PhraseFinder
 
 # Run test 1
-test1in = "0101" + PhraseFinder.CAPTION + "01"*75
+test1in = "0101" + PhraseFinder.CAPTIVATION + "01"*75
 test1out = io.StringIO()
 
 s = io.StringIO(test1in)
@@ -45,7 +45,7 @@ else:
     print("Test 2 success")
 
 # Run test 3
-test3in = "0101" + PhraseFinder.CAPTION + "0101" + PhraseFinder.CAPTION + "01"*75
+test3in = "0101" + PhraseFinder.CAPTIVATION + "0101" + PhraseFinder.CAPTIVATION + "01"*75
 test3out = io.StringIO()
 
 s = io.StringIO(test3in)
@@ -57,13 +57,13 @@ PhraseFinder.run()
 
 sys.stdout = old_stdout
 
-if not ("0101" + PhraseFinder.CAPTION + "01"*50) == test3out.getvalue():
+if not ("0101" + PhraseFinder.CAPTIVATION + "01"*50) == test3out.getvalue():
     print("Test 3 FAILURE")
 else:
     print("Test 3 success")
 
 # Run test 4
-test4in = "01010" + PhraseFinder.CAPTION + "010100" + PhraseFinder.CAPTION + "01"*75 + PhraseFinder.CAPTION + "00"*99
+test4in = "01010" + PhraseFinder.CAPTIVATION + "010100" + PhraseFinder.CAPTIVATION + "01"*75 + PhraseFinder.CAPTIVATION + "00"*99
 test4out = io.StringIO()
 
 s = io.StringIO(test4in)
@@ -75,7 +75,7 @@ PhraseFinder.run()
 
 sys.stdout = old_stdout
 
-if not ("010100" + PhraseFinder.CAPTION + "01"*50 + "00"*50) == test4out.getvalue():
+if not ("010100" + PhraseFinder.CAPTIVATION + "01"*50 + "00"*50) == test4out.getvalue():
     print("Test 4 FAILURE")
 else:
     print("Test 4 success")

@@ -11,10 +11,11 @@ A = "01000001"
 P = "01010000"
 T = "01010100"
 I = "01001001"
+V = "01010110"
 O = "01001111"
 N = "01001110"
 
-CAPTION = C + A + P + T + I + O + N
+CAPTIVATION = C + A + P + T + I + V + A + T + I + O + N
 
 def shiftBuffer(curChar, charBuffer):
     charBufferTemp = charBuffer[1:len(charBuffer)]
@@ -22,11 +23,11 @@ def shiftBuffer(curChar, charBuffer):
     return charBufferTemp
 
 def preambleMatch(charBuffer):
-    if charBuffer == CAPTION:
+    if charBuffer == CAPTIVATION:
         return True
 
 def run():
-    charBuffer = "0" * 56 
+    charBuffer = "0" * 88 
     printing = -1
     
     while True:
