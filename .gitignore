@@ -1,0 +1,7 @@
+*.cbp
+*.depend
+bin/
+obj/
+*.o
+*.out
+
