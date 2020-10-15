@@ -9,19 +9,19 @@
 
 class Captivation
 {
-    public:
-        Captivation();
-        virtual ~Captivation();
-        void process_stdin();
+public:
+    Captivation();
+    virtual ~Captivation();
+    void process_stdin();
 
-    protected:
+protected:
 
-    private:
-        int getNumberActiveProcessors(int bitsRead);
-        void processBitWithProcessor(char bit, BitStreamProcessor *processor);
+private:
+    int getNumberActiveProcessors(int bitsRead);
+    void processBitWithProcessor(char bit, BitStreamProcessor *processor);
 
-        BitStreamProcessor m_bsps[BITS_PER_CHAR];
-        int m_charactersLeftToPrint = 0;
+    BitStreamProcessor m_bsps[BITS_PER_CHAR];
+    int m_charactersLeftToPrint = 0;
 };
 
 #endif // CAPTIVATION_H

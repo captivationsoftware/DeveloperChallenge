@@ -58,7 +58,8 @@ bool BitStreamProcessor::hasReadFullByte()
     is also cleared or shrunk to avoid continuously growing how much memory
     the process is using.
 */
-bool BitStreamProcessor::searchForPreamble(std::string preamble){
+bool BitStreamProcessor::searchForPreamble(std::string preamble)
+{
     size_t pos = m_processedString.find(preamble);
     if(pos != std::string::npos)
     {
@@ -75,10 +76,12 @@ bool BitStreamProcessor::searchForPreamble(std::string preamble){
     return false;
 }
 
-bool BitStreamProcessor::isAlignedWithPreamble(){
+bool BitStreamProcessor::isAlignedWithPreamble()
+{
     return m_isAlignedWithPreamble;
 }
 
-void BitStreamProcessor::finishReadingPreamble(){
+void BitStreamProcessor::finishReadingPreamble()
+{
     m_isAlignedWithPreamble = false;
 }
