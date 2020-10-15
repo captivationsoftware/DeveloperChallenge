@@ -55,10 +55,14 @@ void Captivation::processBitWithProcessor(char bit, BitStreamProcessor *processo
     {
         // if the current processor has found the preamble, and there are still characters left to print,
         // output the processed character to STDOUT.
-        if(m_charactersLeftToPrint > 0 && processor->hasFoundPreamble())
+        if(m_charactersLeftToPrint > 0 && processor->isAlignedWithPreamble())
         {
             std::cout << processor->getCharacter();
             m_charactersLeftToPrint--;
+        }
+        else if(processor->isAlignedWithPreamble())
+        {
+            processor->finishReadingPreamble(); // no more characters left to read.
         }
 
         // reset the processor for the next byte

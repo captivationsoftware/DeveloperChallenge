@@ -38,7 +38,7 @@ void BitStreamProcessor::processBit(char bit)
 
 void BitStreamProcessor::resetForNextByte()
 {
-    m_character = 0;
+    m_character = 0b00000000;
     m_bitNumber = 7;
     m_readFullByte = false;
 }
@@ -63,7 +63,7 @@ bool BitStreamProcessor::searchForPreamble(std::string preamble){
     if(pos != std::string::npos)
     {
         m_processedString.clear(); // erase the string. Memory usage not neccessary anymore.
-        m_foundPreamble = true;
+        m_isAlignedWithPreamble = true;
         return true;
     }
     else if(m_processedString.length() > preamble.length())
@@ -75,6 +75,10 @@ bool BitStreamProcessor::searchForPreamble(std::string preamble){
     return false;
 }
 
-bool BitStreamProcessor::hasFoundPreamble(){
-    return m_foundPreamble;
+bool BitStreamProcessor::isAlignedWithPreamble(){
+    return m_isAlignedWithPreamble;
+}
+
+void BitStreamProcessor::finishReadingPreamble(){
+    m_isAlignedWithPreamble = false;
 }

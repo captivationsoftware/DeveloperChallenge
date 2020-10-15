@@ -16,7 +16,8 @@ public:
     void resetForNextByte();
 
     bool searchForPreamble(std::string);
-    bool hasFoundPreamble();
+    bool isAlignedWithPreamble();
+    void finishReadingPreamble();
 
 protected:
 
@@ -26,7 +27,7 @@ private:
     char m_bitNumber = 7; // between 0 and 7 for each char
     char m_readFullByte = false;
     std::string m_processedString = "";
-    bool m_foundPreamble = false;
+    bool m_isAlignedWithPreamble = false;
 
 };
 
