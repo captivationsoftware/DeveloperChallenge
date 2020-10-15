@@ -1,6 +1,4 @@
 #include "BitStreamProcessor.h"
-#include <unistd.h>
-#include <termios.h>
 #include <iostream>
 
 BitStreamProcessor::BitStreamProcessor()
@@ -13,71 +11,70 @@ BitStreamProcessor::~BitStreamProcessor()
     //dtor
 }
 
-/* Initialize new terminal i/o settings */
-static struct termios old, new1;
-
-void BitStreamProcessor::initTermios(int echo)
-{
-    tcgetattr(0, &old); /* grab old terminal i/o settings */
-    new1 = old; /* make new settings same as old settings */
-    new1.c_lflag &= ~ICANON; /* disable buffered i/o */
-    new1.c_lflag &= echo ? ECHO : ~ECHO; /* set echo mode */
-    tcsetattr(0, TCSANOW, &new1); /* use these new terminal i/o settings now */
-}
-
-/* Restore old terminal i/o settings */
-void BitStreamProcessor::resetTermios(void)
-{
-    tcsetattr(0, TCSANOW, &old);
-}
-
-void BitStreamProcessor::initialize()
-{
-    // don't require 'newline' character to be read from input
-    initTermios(0);
-}
-
 void BitStreamProcessor::processBit(char bit)
 {
     // only process the bit if the processor does not have a character ready
-    if(!ready)
+    if(!m_readFullByte)
     {
-        if (bit == '1' || bit == '0')
+        // when a 1 is read, set the bit in the character byte
+        if(bit == '1')
         {
-            if(bit == '1')
-            {
-                character |= 0b00000001 << bitNumber; // set the bit corresponding to the current character
-            }
+            m_character |= 0b00000001 << m_bitNumber;
+        }
 
-            if(bitNumber <= 0)
-            {
-                ready = true;
-            }
-            else
-            {
-                bitNumber--;
-            }
+        // update status on reading a full byte
+        if(m_bitNumber <= 0)
+        {
+            m_readFullByte = true;
+            // append character to string after a full byte is read.
+            m_processedString += m_character;
         }
         else
         {
-            printf("Only 1's and 0's may be input.\n");
+            m_bitNumber--;
         }
     }
 }
 
-void BitStreamProcessor::reset()
+void BitStreamProcessor::resetForNextByte()
 {
-    character = 0;
-    bitNumber = 7;
-    ready = false;
+    m_character = 0;
+    m_bitNumber = 7;
+    m_readFullByte = false;
 }
 
 char BitStreamProcessor::getCharacter()
 {
-    return character;
+    return m_character;
 }
 
-bool BitStreamProcessor::isReady()
+bool BitStreamProcessor::hasReadFullByte()
 {
-    return ready;
+    return m_readFullByte;
+}
+
+/**
+    When the preamble is searched for, the string stored in memory
+    is also cleared or shrunk to avoid continuously growing how much memory
+    the process is using.
+*/
+bool BitStreamProcessor::searchForPreamble(std::string preamble){
+    size_t pos = m_processedString.find(preamble);
+    if(pos != std::string::npos)
+    {
+        m_processedString.clear(); // erase the string. Memory usage not neccessary anymore.
+        m_foundPreamble = true;
+        return true;
+    }
+    else if(m_processedString.length() > preamble.length())
+    {
+        // clear up memory by removing impossibly matching characters
+        m_processedString.erase(0, m_processedString.length()-preamble.length());
+    }
+
+    return false;
+}
+
+bool BitStreamProcessor::hasFoundPreamble(){
+    return m_foundPreamble;
 }

@@ -1,84 +1,33 @@
 #include <string>
+#include <unistd.h>
+#include <termios.h>
 #include <iostream>
-#include "BitStreamProcessor.h"
+#include "Captivation.h"
 
 using namespace std;
 
+/* Initialize new terminal i/o settings */
+static struct termios old, new1;
+
+void initTermios(int echo)
+{
+    tcgetattr(0, &old); /* grab old terminal i/o settings */
+    new1 = old; /* make new settings same as old settings */
+    new1.c_lflag &= ~ICANON; /* disable buffered i/o */
+    new1.c_lflag &= echo ? ECHO : ~ECHO; /* set echo mode */
+    tcsetattr(0, TCSANOW, &new1); /* use these new terminal i/o settings now */
+}
+
+/* Restore old terminal i/o settings */
+void resetTermios(void)
+{
+    tcsetattr(0, TCSANOW, &old);
+}
+
 int main()
 {
-    int BITS_PER_CHAR = 8;
-    string captivation = "CAPTIVATION";
-
-
-    BitStreamProcessor bsps[BITS_PER_CHAR];
-    string bsp_strings[BITS_PER_CHAR] = {""};
-    bool processorsFoundCaptivation[BITS_PER_CHAR] = {false};
-
-    for(BitStreamProcessor bsp : bsps)
-    {
-        bsp.initialize();
-    }
-
-    char bit;
-
-    int bitNum = 0; // start new processor on each bit in the beginning of the stream.
-    int max_processors = 0;
-    int printCharacters = 0;
-
-    printf("Now processing STDIN...\n");
-
-    // continuously read from STDIN each character.
-    // stagger 8 processors so that characters are read beginning at each bit.
-    while (true)
-    {
-        cin >> bit;
-        bitNum++;
-
-
-        if(bitNum < BITS_PER_CHAR)
-        {
-            max_processors = bitNum;
-        }
-        else
-        {
-            max_processors = BITS_PER_CHAR;
-        }
-
-        for(int i = 0; i < max_processors; i++)
-        {
-            bsps[i].processBit(bit);
-            if(bsps[i].isReady())
-            {
-                bsp_strings[i] += bsps[i].getCharacter();
-
-                // if found, print next 100 characters.
-                if(printCharacters > 0 && processorsFoundCaptivation[i] == true)
-                {
-                    cout << bsps[i].getCharacter();
-                    printCharacters--;
-                }
-                else
-                {
-                    processorsFoundCaptivation[i] = false;
-                }
-                bsps[i].reset();
-
-
-                // try to find CAPTIVATION
-                size_t pos = bsp_strings[i].find(captivation);
-                if(pos != string::npos)
-                {
-                    bsp_strings[i].clear(); // erase the string. Memory usage not neccessary anymore.
-                    printCharacters = 100;
-                    processorsFoundCaptivation[i] = true;
-                }
-                else if(bsp_strings[i].length() > captivation.length())
-                {
-                    // clear up memory by removing impossibly matching characters
-                    bsp_strings[i].erase(0, bsp_strings[i].length()-captivation.length());
-                }
-            }
-        }
-    }
+    initTermios(0); // put terminal in 'raw' mode so no newline required by STDIN
+    Captivation captivation = Captivation(); // create static captivation object
+    captivation.process_stdin(); // process stdin
     return 0;
 }

@@ -1,10 +1,13 @@
 cc=g++
-objects=main.o BitStreamProcessor.o 
+objects=main.o Captivation.o BitStreamProcessor.o 
 cflags=-Wall -fPIE
 INCLUDE=-I include/
 
 all: ${objects}
 	${cc} ${cflags} ${objects} -o main.out ${INCLUDE} -fPIE
+
+Captivation.o: ./src/Captivation.cpp ./include/Captivation.h
+	${cc} ${cflags} -c ./src/Captivation.cpp ${INCLUDE}
 
 BitStreamProcessor.o: ./src/BitStreamProcessor.cpp ./include/BitStreamProcessor.h
 	${cc} ${cflags} -c ./src/BitStreamProcessor.cpp ${INCLUDE}
