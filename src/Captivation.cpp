@@ -70,9 +70,9 @@ void Captivation::processBitWithProcessor(char bit, BitStreamProcessor *processo
 
         // additionally, search to see if the preamble has been found every time a new byte is read.
         // if it has been, reset the number of characters required to be read to 100.
-        if(processor->searchForPreamble(m_preamble))
+        if(processor->searchForPreamble(PREAMBLE))
         {
-            m_charactersLeftToPrint = 100;
+            m_charactersLeftToPrint = MESSAGE_LENGTH;
         }
     }
 }
