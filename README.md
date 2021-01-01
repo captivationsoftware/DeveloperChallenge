@@ -19,3 +19,12 @@ Develop an application that:
 - Your solution should include instructions on how to run/build via Linux command line (or even better, use Docker)
 - Your solution will be judged for correctness, performance, and style
 - You may use any language you'd like, but you can only use standard libraries
+
+
+
+
+## Assumptions:
+- Strings from input are `\n` delimited before they are expected to be operated on? -- not doing this appears to require system calls to solve the issue since stdin is line buffered by default
+- EOF will be provided when the input needs to be closed (Ctrl+D)
+- Input is an element of the set {"0","1"} in ASCII and EOF will signal the end of the program
+- If the input is CAPTIVATION followed by less than 100 decoded ASCII characters, we will still print out the 100> characters and wait for more
