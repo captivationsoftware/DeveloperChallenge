@@ -22,9 +22,27 @@ Develop an application that:
 
 
 
+## Developed on:
+- Mac OS X Catalina 10.15.7
+- Go: go1.15.6 darwin/amd64
 
 ## Assumptions:
-- Strings from input are `\n` delimited before they are expected to be operated on? -- not doing this appears to require system calls to solve the issue since stdin is line buffered by default
-- EOF will be provided when the input needs to be closed (Ctrl+D)
+- Strings from input are `\n` delimited before they are expected to be operated on but `\n` is not counted as input (0,1) 
+  - not doing this appears to require system calls to solve the issue since stdin is line buffered by default
 - Input is an element of the set {"0","1"} in ASCII and EOF will signal the end of the program
 - If the input is CAPTIVATION followed by less than 100 decoded ASCII characters, we will still print out the 100> characters and wait for more
+
+## How to run the code locally
+- from the root directory, type:
+
+```bash
+
+go run cmd/main.go`
+
+```
+
+## How to run the code from docker
+
+
+
+
