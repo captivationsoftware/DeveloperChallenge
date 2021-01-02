@@ -3,7 +3,6 @@ package captivation
 import (
 	"bufio"
 	"io"
-	"os"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -13,9 +12,9 @@ import (
 //TODO: might change this to use bytes instead of runes
 
 // ScanForMessages scans the input stream for message bytes in a loop until the EOF character is presented
-func ScanForMessages(log *logger.LogWrapper, preamble string, input io.Reader, bufferSizeInBytes int) {
-	log.Printf("starting scan with buf size: %v in bytes", bufferSizeInBytes)
-	inbuf := bufio.NewReaderSize(input, bufferSizeInBytes) // limit buffer size so we can test more easily
+func ScanForMessages(log *logger.LogWrapper, preamble string, input io.Reader, inputBufferSizeInBytes int, output io.Writer) {
+	log.Printf("starting scan with buf size: %v in bytes", inputBufferSizeInBytes)
+	inbuf := bufio.NewReaderSize(input, inputBufferSizeInBytes) // limit buffer size so we can test more easily
 
 	l := len(preamble)
 	log.Printf("preamble length: %v", l)
@@ -25,20 +24,13 @@ func ScanForMessages(log *logger.LogWrapper, preamble string, input io.Reader, b
 	for {
 		// runes are unicode 32-bit characters (can expand over byte boundaries)
 		r, err := inbuf.ReadByte()
-		log.Printf("buffer size: %v", inbuf.Size())
+		// log.Printf("buffer size: %v", inbuf.Size())
 		if err == io.EOF {
 			log.Printf("terminating program")
 			break
 		} else if err != nil {
 			log.Printf("%+v", errors.Wrapf(err, "received error while reading in the next rune"))
 		}
-		// else if r == unicode.ReplacementChar {
-		// 	log.Printf("%+v", errors.Errorf("invalid character found in input; must be unicode"))
-		// } else if string(r) != "0" && string(r) != "1" {
-		// 	continue
-		// }
-
-		// log.Printf("read %v byte(s) into rune: %#U", numBytes, r)
 
 		// print rune if we're supposed to
 		// prints could be at different byte lengths
@@ -46,7 +38,7 @@ func ScanForMessages(log *logger.LogWrapper, preamble string, input io.Reader, b
 		filteredPrinters := printers[:0] // used to filter out completed printers in place so we don't keep allocating more space
 		for _, p := range printers {
 			if p.NumCharsLeftToPrint > 0 {
-				p.Fprint(r, log, os.Stdout)
+				p.Fprint(r, log, output)
 			}
 			if p.NumCharsLeftToPrint > 0 {
 				filteredPrinters = append(filteredPrinters, p)
@@ -54,31 +46,31 @@ func ScanForMessages(log *logger.LogWrapper, preamble string, input io.Reader, b
 		}
 		printers = filteredPrinters
 
-		if len(window) < l { // if the window is less than the size of the preamble, then we need to continue
-			log.Printf("%v", string(r))
-			log.Printf("window size: %v, continuing...", len(window))
+		if len(window) < l-1 { // if the window is less than the size of the preamble-1, then we need to continue
+			// log.Printf("%v", string(r))
+			// log.Printf("window size: %v, continuing...", len(window))
 			window = append(window, r)
 			continue
-		} else { // in this case, window >= length(preamble)
-			curr := string(window)
-			log.Printf("window after adding new rune: %v", curr)
-
-			i := strings.Index(curr, preamble)
-
-			// if the index is found add a printer so that the message will get printed (next 100 decoded chars)
-			if i != -1 {
-				log.Printf("found PREAMBLE!")
-				p := MessagePrinter{
-					NumCharsLeftToPrint: 100,
-					NumBytesTillPrint:   8,
-					Bytes:               make([]byte, 0, 8),
-				}
-				printers = append(printers, &p)
-			}
-
+		} else if len(window) >= l { // in this case, window >= length(preamble)
 			// rotate window
 			window = window[1:]
-			window = append(window, r)
+		}
+		window = append(window, r)
+		curr := string(window)
+		// log.Printf("window after adding new rune: %v", curr)
+
+		i := strings.Index(curr, preamble)
+
+		//FIXME: off by 1
+		// if the index is found add a printer so that the message will get printed (next 100 decoded chars)
+		if i != -1 {
+			log.Printf("found PREAMBLE!")
+			p := MessagePrinter{
+				NumCharsLeftToPrint: 100,
+				NumBytesTillPrint:   8,
+				Bytes:               make([]byte, 0, 8),
+			}
+			printers = append(printers, &p)
 		}
 	}
 }

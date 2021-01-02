@@ -29,5 +29,6 @@ func (mp *MessagePrinter) Fprint(r byte, log *logger.LogWrapper, w io.Writer) {
 		mp.NumBytesTillPrint = 8
 		mp.NumCharsLeftToPrint--
 		mp.Bytes = mp.Bytes[:0]
+		// fmt.Printf("\n")
 	}
 }

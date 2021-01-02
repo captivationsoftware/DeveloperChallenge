@@ -51,5 +51,5 @@ func main() {
 	// set logger
 	l := &logger.LogWrapper{DebugMode: false}
 
-	captivation.ScanForMessages(l, PREAMBLE, os.Stdin, 32)
+	captivation.ScanForMessages(l, PREAMBLE, os.Stdin, 32, os.Stdout)
 }
