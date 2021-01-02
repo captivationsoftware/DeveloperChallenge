@@ -9,7 +9,10 @@ import (
 	"github.com/pt-arvind/DeveloperChallenge/internal/logger"
 )
 
-//TODO: might change this to use bytes instead of runes
+//TODO: use channels to properly keep the program running if the buffer keeps being written to
+// function should take in a channel, wait on byte, then do everything else as it already does
+// in a wrapper function, we set up the channel and just wait for input, similar to what we've got here, as soon as input comes in
+// it is written to this channel and continues on?
 
 // ScanForMessages scans the input stream for message bytes in a loop until the EOF character is presented
 func ScanForMessages(log *logger.LogWrapper, preamble string, input io.Reader, inputBufferSizeInBytes int, output io.Writer) {
