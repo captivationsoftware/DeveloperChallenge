@@ -48,7 +48,7 @@ func main() {
 	// if captivation is found, take the next 100 bits and fire it out to output
 
 	// set logger
-	l := &logger.LogWrapper{DebugMode: true}
+	l := &logger.LogWrapper{DebugMode: false}
 
 	captivation.ScanForMessages(l, PREAMBLE, os.Stdin, 32)
 }

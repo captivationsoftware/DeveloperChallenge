@@ -2,6 +2,7 @@ package captivation
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"strings"
 	"unicode"
@@ -21,16 +22,19 @@ type MessagePrinter struct {
 
 // Print collects the rune then decides whether or not it ought to print it
 func (mp *MessagePrinter) Print(r rune, log *logger.LogWrapper) {
+	// fmt.Printf("%v", string(r))
 	mp.Runes = append(mp.Runes, r)
 	mp.NumBytesTillPrint--
 	if mp.NumBytesTillPrint == 0 {
-		//TODO: decode runes into character
-		//TODO: print character
-		log.Printf("should print: %v", string(r))
-
-		// fmt.Printf("%v", string())
+		// decode runes into character
+		c, err := DecodeASCII(mp.Runes, LittleEndian)
+		if err != nil {
+			log.Printf("error while trying to print decoded word: %+v", err)
+		}
+		fmt.Print(c)
 		mp.NumBytesTillPrint = 8
 		mp.NumCharsLeftToPrint--
+		mp.Runes = mp.Runes[:0]
 	}
 }
 
@@ -41,7 +45,7 @@ func ScanForMessages(log *logger.LogWrapper, preamble string, input io.Reader, b
 
 	l := len(preamble)
 	log.Printf("preamble length: %v", l)
-	window := make([]rune, l) // extra rune's worth
+	window := make([]rune, 0, l) // extra rune's worth
 	printers := []*MessagePrinter{}
 
 	for {
@@ -54,10 +58,12 @@ func ScanForMessages(log *logger.LogWrapper, preamble string, input io.Reader, b
 		} else if err != nil {
 			log.Printf("%+v", errors.Wrapf(err, "received error while reading in the next rune"))
 		} else if r == unicode.ReplacementChar {
-			log.Printf("%+v", errors.Errorf("invalid character found in input; must be unicode UTF8"))
+			log.Printf("%+v", errors.Errorf("invalid character found in input; must be unicode"))
+		} else if string(r) != "0" && string(r) != "1" {
+			continue
 		}
 
-		log.Printf("read %v byte(s) into rune: %v", numBytes, string(r))
+		log.Printf("read %v byte(s) into rune: %#U", numBytes, r)
 
 		// print rune if we're supposed to
 		// prints could be at different byte lengths
@@ -90,7 +96,7 @@ func ScanForMessages(log *logger.LogWrapper, preamble string, input io.Reader, b
 				p := MessagePrinter{
 					NumCharsLeftToPrint: 100,
 					NumBytesTillPrint:   8,
-					Runes:               make([]rune, 8),
+					Runes:               make([]rune, 0, 8),
 				}
 				printers = append(printers, &p)
 			}
