@@ -20,15 +20,15 @@ Develop an application that:
 - Your solution will be judged for correctness, performance, and style
 - You may use any language you'd like, but you can only use standard libraries
 
-
-
 ## Developed on:
 - Mac OS X Catalina 10.15.7
 - Go: go1.15.6 darwin/amd64
+- Git: git version 2.8.4 (Apple Git-73)
 
 ## Assumptions:
 - Strings from input are `\n` delimited before they are expected to be operated on but `\n` is not counted as input (0,1) 
   - not doing this appears to require system calls to solve the issue since stdin is line buffered by default
+  - additionally, if system calls are used, docker will not be as handy due to the fact that it does not simulate the kernel and different systems will need different headers packaged in to work at all
 - Input is an element of the set {"0","1"} in ASCII and EOF will signal the end of the program
 - If the input is CAPTIVATION followed by less than 100 decoded ASCII characters, we will still print out the 100> characters and wait for more
 - Assuming that 0's and 1's are UTF-8
