@@ -22,9 +22,9 @@ func ScanForMessages(log *logger.LogWrapper, preamble string, input io.Reader, i
 	printers := []*MessagePrinter{}
 
 	for {
-		// runes are unicode 32-bit characters (can expand over byte boundaries)
+		// assuming UTF-8
 		r, err := inbuf.ReadByte()
-		// log.Printf("buffer size: %v", inbuf.Size())
+		log.Printf("buffer size: %v remaining: %v", inbuf.Size(), inbuf.Buffered())
 		if err == io.EOF {
 			log.Printf("terminating program")
 			break
@@ -47,8 +47,6 @@ func ScanForMessages(log *logger.LogWrapper, preamble string, input io.Reader, i
 		printers = filteredPrinters
 
 		if len(window) < l-1 { // if the window is less than the size of the preamble-1, then we need to continue
-			// log.Printf("%v", string(r))
-			// log.Printf("window size: %v, continuing...", len(window))
 			window = append(window, r)
 			continue
 		} else if len(window) >= l { // in this case, window >= length(preamble)
@@ -57,7 +55,6 @@ func ScanForMessages(log *logger.LogWrapper, preamble string, input io.Reader, i
 		}
 		window = append(window, r)
 		curr := string(window)
-		// log.Printf("window after adding new rune: %v", curr)
 
 		i := strings.Index(curr, preamble)
 
