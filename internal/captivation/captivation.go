@@ -2,41 +2,15 @@ package captivation
 
 import (
 	"bufio"
-	"fmt"
 	"io"
+	"os"
 	"strings"
-	"unicode"
 
 	"github.com/pkg/errors"
 	"github.com/pt-arvind/DeveloperChallenge/internal/logger"
 )
 
 //TODO: might change this to use bytes instead of runes
-
-// MessagePrinter is a struct that holds state for printing messages
-type MessagePrinter struct {
-	NumCharsLeftToPrint int
-	NumBytesTillPrint   int
-	Runes               []rune
-}
-
-// Print collects the rune then decides whether or not it ought to print it
-func (mp *MessagePrinter) Print(r rune, log *logger.LogWrapper) {
-	// fmt.Printf("%v", string(r))
-	mp.Runes = append(mp.Runes, r)
-	mp.NumBytesTillPrint--
-	if mp.NumBytesTillPrint == 0 {
-		// decode runes into character
-		c, err := DecodeASCII(mp.Runes, LittleEndian)
-		if err != nil {
-			log.Printf("error while trying to print decoded word: %+v", err)
-		}
-		fmt.Print(c)
-		mp.NumBytesTillPrint = 8
-		mp.NumCharsLeftToPrint--
-		mp.Runes = mp.Runes[:0]
-	}
-}
 
 // ScanForMessages scans the input stream for message bytes in a loop until the EOF character is presented
 func ScanForMessages(log *logger.LogWrapper, preamble string, input io.Reader, bufferSizeInBytes int) {
@@ -45,25 +19,26 @@ func ScanForMessages(log *logger.LogWrapper, preamble string, input io.Reader, b
 
 	l := len(preamble)
 	log.Printf("preamble length: %v", l)
-	window := make([]rune, 0, l) // extra rune's worth
+	window := make([]byte, 0, l) // extra rune's worth
 	printers := []*MessagePrinter{}
 
 	for {
 		// runes are unicode 32-bit characters (can expand over byte boundaries)
-		r, numBytes, err := inbuf.ReadRune()
+		r, err := inbuf.ReadByte()
 		log.Printf("buffer size: %v", inbuf.Size())
 		if err == io.EOF {
 			log.Printf("terminating program")
 			break
 		} else if err != nil {
 			log.Printf("%+v", errors.Wrapf(err, "received error while reading in the next rune"))
-		} else if r == unicode.ReplacementChar {
-			log.Printf("%+v", errors.Errorf("invalid character found in input; must be unicode"))
-		} else if string(r) != "0" && string(r) != "1" {
-			continue
 		}
+		// else if r == unicode.ReplacementChar {
+		// 	log.Printf("%+v", errors.Errorf("invalid character found in input; must be unicode"))
+		// } else if string(r) != "0" && string(r) != "1" {
+		// 	continue
+		// }
 
-		log.Printf("read %v byte(s) into rune: %#U", numBytes, r)
+		// log.Printf("read %v byte(s) into rune: %#U", numBytes, r)
 
 		// print rune if we're supposed to
 		// prints could be at different byte lengths
@@ -71,7 +46,7 @@ func ScanForMessages(log *logger.LogWrapper, preamble string, input io.Reader, b
 		filteredPrinters := printers[:0] // used to filter out completed printers in place so we don't keep allocating more space
 		for _, p := range printers {
 			if p.NumCharsLeftToPrint > 0 {
-				p.Print(r, log)
+				p.Fprint(r, log, os.Stdout)
 			}
 			if p.NumCharsLeftToPrint > 0 {
 				filteredPrinters = append(filteredPrinters, p)
@@ -96,7 +71,7 @@ func ScanForMessages(log *logger.LogWrapper, preamble string, input io.Reader, b
 				p := MessagePrinter{
 					NumCharsLeftToPrint: 100,
 					NumBytesTillPrint:   8,
-					Runes:               make([]rune, 0, 8),
+					Bytes:               make([]byte, 0, 8),
 				}
 				printers = append(printers, &p)
 			}

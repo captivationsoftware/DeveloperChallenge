@@ -11,7 +11,7 @@ func TestDecodeBasic(t *testing.T) {
 	input := "01100010"
 	expected := "b"
 	log.Printf("input: %+v", input)
-	res, err := DecodeASCII([]rune(input), LittleEndian)
+	res, err := DecodeASCII([]byte(input), LittleEndian)
 	if err != nil {
 		t.Errorf("received error, got: %+v, want: nil", err)
 	}

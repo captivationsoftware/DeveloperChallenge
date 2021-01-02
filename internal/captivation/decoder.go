@@ -16,24 +16,24 @@ const (
 )
 
 // reverse reverses the order of the input slice
-func reverse(runes []rune) []rune {
-	for i := len(runes)/2 - 1; i >= 0; i-- {
-		opp := len(runes) - 1 - i
-		runes[i], runes[opp] = runes[opp], runes[i]
+func reverse(bs []byte) []byte {
+	for i := len(bs)/2 - 1; i >= 0; i-- {
+		opp := len(bs) - 1 - i
+		bs[i], bs[opp] = bs[opp], bs[i]
 	}
 
-	return runes
+	return bs
 }
 
 // DecodeASCII converts 8 runes of "0" or "1" into an ascii character
-func DecodeASCII(runes []rune, e Endianness) (string, error) {
-	if len(runes) != 8 {
-		return "", errors.Errorf("invalid rune slice length: %v should be 8", len(runes))
+func DecodeASCII(bs []byte, e Endianness) (string, error) {
+	if len(bs) != 8 {
+		return "", errors.Errorf("invalid byte slice length: %v should be 8", len(bs))
 	}
 
-	order := runes
+	order := bs
 	if e == LittleEndian {
-		order = reverse(runes)
+		order = reverse(bs)
 	}
 
 	s := byte(0)

@@ -47,6 +47,7 @@ func main() {
 	// continue as usual
 	// if captivation is found, take the next 100 bits and fire it out to output
 
+	//TODO: add a config for all the stuff here
 	// set logger
 	l := &logger.LogWrapper{DebugMode: false}
 
