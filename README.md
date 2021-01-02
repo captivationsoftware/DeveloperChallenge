@@ -68,7 +68,7 @@ From the root directory:
 
 ```bash
 
-docker build -t pt-arvind/captivation:latest -f ./docker/Dockerfile  .
+docker build -t pt-arvind/captivation:latest .
 
 docker run pt-arvind/captivation:latest
 
