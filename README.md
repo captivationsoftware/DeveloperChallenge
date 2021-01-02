@@ -24,13 +24,13 @@ Develop an application that:
 - Your solution will be judged for correctness, performance, and style
 - You may use any language you'd like, but you can only use standard libraries
 
-## Developed on:
+## Developed on
 
 - Mac OS X Catalina 10.15.7
 - Go: go1.15.6 darwin/amd64
 - Git: git version 2.8.4 (Apple Git-73)
 
-## Assumptions:
+## Assumptions
 
 - Strings from stdin are not processed till linefeed is entered (`\n` or enter on the keyboard)
   - not doing this appears to require system calls to solve the issue since stdin is line buffered by default
@@ -44,6 +44,7 @@ Develop an application that:
 - 0's and 1's are UTF-8
 
 ## How to run the code locally
+
 - from the root directory, type:
 
 ```bash
@@ -70,6 +71,6 @@ From the root directory:
 
 docker build -t pt-arvind/captivation:latest .
 
-docker run pt-arvind/captivation:latest
+docker run -i pt-arvind/captivation:latest
 
 ```
