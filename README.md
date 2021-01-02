@@ -26,12 +26,16 @@ Develop an application that:
 - Git: git version 2.8.4 (Apple Git-73)
 
 ## Assumptions:
-- Strings from input are `\n` delimited before they are expected to be operated on but `\n` is not counted as input (0,1) 
+- Strings from stdin are not processed till linefeed is entered (`\n` or enter on the keyboard)
   - not doing this appears to require system calls to solve the issue since stdin is line buffered by default
   - additionally, if system calls are used, docker will not be as handy due to the fact that it does not simulate the kernel and different systems will need different headers packaged in to work at all
+  - as can be seen from the tests, using a stream will get around this limitation and the program will work in this case
 - Input is an element of the set {"0","1"} in ASCII and EOF will signal the end of the program
 - If the input is CAPTIVATION followed by less than 100 decoded ASCII characters, we will still print out the 100> characters and wait for more
-- Assuming that 0's and 1's are UTF-8
+- If multiple CAPTIVATION preambles are found within one another, then the program will print out messages from both concurrently:
+  - if we see `CAPTIVATIONblahCAPTIVATIONblahblah...`
+  - the output will be `blahCAPTIVATIONbbllaahhbbllaahh...` it will not wait for one message to play before beginning the next message as reflected in the tests
+- 0's and 1's are UTF-8
 
 ## How to run the code locally
 - from the root directory, type:
@@ -52,6 +56,7 @@ go test ./...
 
 ## How to run the code from docker
 
+DISCLAIMER: I have deliberately 
 
 
 

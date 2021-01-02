@@ -2,10 +2,10 @@ package captivation
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"strings"
 
-	"github.com/pkg/errors"
 	"github.com/pt-arvind/DeveloperChallenge/internal/logger"
 )
 
@@ -29,7 +29,7 @@ func ScanForMessages(log *logger.LogWrapper, preamble string, input io.Reader, i
 			log.Printf("terminating program")
 			break
 		} else if err != nil {
-			log.Printf("%+v", errors.Wrapf(err, "received error while reading in the next rune"))
+			log.Printf("%+v", fmt.Errorf("received error while reading in the next byte: %+v", err))
 		}
 
 		// print rune if we're supposed to
@@ -58,7 +58,6 @@ func ScanForMessages(log *logger.LogWrapper, preamble string, input io.Reader, i
 
 		i := strings.Index(curr, preamble)
 
-		//FIXME: off by 1
 		// if the index is found add a printer so that the message will get printed (next 100 decoded chars)
 		if i != -1 {
 			log.Printf("found PREAMBLE!")

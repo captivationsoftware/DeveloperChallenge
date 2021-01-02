@@ -1,8 +1,6 @@
 package captivation
 
-import (
-	"github.com/pkg/errors"
-)
+import "fmt"
 
 // Endianness is the endianness of the system
 type Endianness int
@@ -28,7 +26,7 @@ func reverse(bs []byte) []byte {
 // DecodeASCII converts 8 runes of "0" or "1" into an ascii character
 func DecodeASCII(bs []byte, e Endianness) (string, error) {
 	if len(bs) != 8 {
-		return "", errors.Errorf("invalid byte slice length: %v should be 8", len(bs))
+		return "", fmt.Errorf("invalid byte slice length: %v should be 8", len(bs))
 	}
 
 	order := bs
@@ -43,7 +41,7 @@ func DecodeASCII(bs []byte, e Endianness) (string, error) {
 		} else if string(r) == "1" {
 			s = s + 1<<i
 		} else {
-			return "", errors.Errorf("invalid rune character at index: %v char: %v", i, string(r))
+			return "", fmt.Errorf("invalid rune character at index: %v char: %v", i, string(r))
 		}
 	}
 
