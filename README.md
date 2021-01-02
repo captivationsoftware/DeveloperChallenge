@@ -31,15 +31,24 @@ Develop an application that:
   - not doing this appears to require system calls to solve the issue since stdin is line buffered by default
 - Input is an element of the set {"0","1"} in ASCII and EOF will signal the end of the program
 - If the input is CAPTIVATION followed by less than 100 decoded ASCII characters, we will still print out the 100> characters and wait for more
+- Assuming that 0's and 1's are UTF-8
 
 ## How to run the code locally
 - from the root directory, type:
 
 ```bash
 
-go run cmd/main.go`
+go run cmd/main.go
 
 ```
+## How to run the tests locally
+
+```bash
+
+go test ./...
+
+```
+
 
 ## How to run the code from docker
 

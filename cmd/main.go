@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/pt-arvind/DeveloperChallenge/internal/captivation"
 	"github.com/pt-arvind/DeveloperChallenge/internal/logger"
 )
@@ -48,5 +50,5 @@ func main() {
 	// set logger
 	l := &logger.LogWrapper{DebugMode: true}
 
-	captivation.ScanForMessages(l, PREAMBLE)
+	captivation.ScanForMessages(l, PREAMBLE, os.Stdin, 32)
 }
