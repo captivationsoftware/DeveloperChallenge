@@ -10,14 +10,15 @@ import (
 	"github.com/pt-arvind/DeveloperChallenge/internal/logger"
 )
 
-// Listen continually calls ProduceBits
+// Listen continually calls ProduceBits so that even if a termination input occurs, it does not stop the program
+// this is what will be used in the actual execution
 func Listen(log *logger.LogWrapper, input io.Reader, consumer chan byte, wg *sync.WaitGroup) {
 	for {
 		ProduceBits(log, input, consumer, wg)
 	}
 }
 
-// ProduceBits begins listening for user input
+// ProduceBits begins listening for user input, will terminate on EOF so we can test this function easily
 func ProduceBits(log *logger.LogWrapper, input io.Reader, consumer chan byte, wg *sync.WaitGroup) {
 	// start the producer on the main thread
 	inbuf := bufio.NewReaderSize(input, 16)
@@ -50,9 +51,7 @@ func ProcessMessages(log *logger.LogWrapper, preamble string, input chan byte, o
 	window := make([]byte, 0, preambleLength) // capacity is the length of the preamble
 	printers := []*MessagePrinter{}
 
-	for {
-		// could use anonymous function here
-
+	for ; ; wg.Done() { // every time a byte is processed, wg.Done() is called to signal processing complete
 		log.Printf("waiting on next byte...")
 		log.Printf("input size: %v", len(input))
 		b := <-input // read next byte
@@ -70,9 +69,8 @@ func ProcessMessages(log *logger.LogWrapper, preamble string, input chan byte, o
 		}
 		printers = filteredPrinters
 
-		if len(window) < preambleLength-1 { // if the window is less than the size of the preamble-1, then we need to continue
+		if len(window) < preambleLength-1 { // if the window is less than the length of the preamble-1, then we need to continue
 			window = append(window, b)
-			wg.Done() // FIXME: refactor this so that we can defer the wg.Done()
 			continue
 		} else if len(window) >= preambleLength { // in this case, window >= length(preamble)
 			// rotate window
@@ -93,7 +91,5 @@ func ProcessMessages(log *logger.LogWrapper, preamble string, input chan byte, o
 			}
 			printers = append(printers, &p)
 		}
-
-		wg.Done()
 	}
 }
