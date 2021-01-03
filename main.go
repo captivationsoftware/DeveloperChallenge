@@ -18,5 +18,9 @@ func main() {
 	var wg sync.WaitGroup
 	log := &logger.LogWrapper{DebugMode: false}
 	consumer := make(chan byte, 16) // buffered channel size 16
-	captivation.Listen(PREAMBLE, log, os.Stdin, os.Stdout, consumer, &wg)
+	input := os.Stdin
+
+	// run the consumer on a separate goroutine
+	go captivation.ProcessMessages(log, PREAMBLE, consumer, os.Stdout, &wg)
+	captivation.Listen(log, input, consumer, &wg)
 }

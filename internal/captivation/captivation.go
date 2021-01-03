@@ -10,18 +10,25 @@ import (
 	"github.com/pt-arvind/DeveloperChallenge/internal/logger"
 )
 
-// Listen begins listening for user input
-func Listen(preamble string, log *logger.LogWrapper, input io.Reader, output io.Writer, consumer chan byte, wg *sync.WaitGroup) {
-	// run the consumer on a separate goroutine
-	go ScanForMessages(log, preamble, consumer, output, wg)
+// Listen continually calls ProduceBits
+func Listen(log *logger.LogWrapper, input io.Reader, consumer chan byte, wg *sync.WaitGroup) {
+	for {
+		ProduceBits(log, input, consumer, wg)
+	}
+}
 
+// ProduceBits begins listening for user input
+func ProduceBits(log *logger.LogWrapper, input io.Reader, consumer chan byte, wg *sync.WaitGroup) {
 	// start the producer on the main thread
 	inbuf := bufio.NewReaderSize(input, 16)
 	for {
 		// assuming UTF-8
 		b, err := inbuf.ReadByte()
 		log.Printf("buffer size: %v remaining: %v", inbuf.Size(), inbuf.Buffered())
-		if err != nil {
+		if err == io.EOF {
+			log.Printf("received eof, stopping listening")
+			break
+		} else if err != nil {
 			log.Printf("%+v", fmt.Errorf("received error while reading in the next byte: %+v", err))
 			continue
 		} else if string(b) != "1" && string(b) != "0" {
@@ -36,8 +43,8 @@ func Listen(preamble string, log *logger.LogWrapper, input io.Reader, output io.
 	}
 }
 
-// ScanForMessages scans the input stream for message bytes in a loop until the EOF character is presented
-func ScanForMessages(log *logger.LogWrapper, preamble string, input chan byte, output io.Writer, wg *sync.WaitGroup) {
+// ProcessMessages scans the input stream for message bytes in a loop until the EOF character is presented
+func ProcessMessages(log *logger.LogWrapper, preamble string, input chan byte, output io.Writer, wg *sync.WaitGroup) {
 	preambleLength := len(preamble)
 	log.Printf("preamble length: %v", preambleLength)
 	window := make([]byte, 0, preambleLength) // capacity is the length of the preamble

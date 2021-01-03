@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/pt-arvind/DeveloperChallenge/internal/logger"
 )
@@ -25,8 +24,10 @@ func TestLessThan100AfterPreamble(t *testing.T) {
 	consumer := make(chan byte, 16) // buffered channel size 16
 	var wg sync.WaitGroup
 	inBuf.Write(input)
-	go Listen(PREAMBLE, log, &inBuf, &outBuf, consumer, &wg)
-	<-time.After(500 * time.Millisecond) //FIXME: dirty
+
+	go ProcessMessages(log, PREAMBLE, consumer, &outBuf, &wg)
+	ProduceBits(log, &inBuf, consumer, &wg)
+
 	wg.Wait()
 
 	if outBuf.String() != expected {
@@ -45,9 +46,11 @@ func TestBasicInputMessage(t *testing.T) {
 	log := &logger.LogWrapper{DebugMode: true}
 	consumer := make(chan byte, 16) // buffered channel size 16
 	var wg sync.WaitGroup
-	go Listen(PREAMBLE, log, &inBuf, &outBuf, consumer, &wg)
 	inBuf.Write(input)
-	<-time.After(500 * time.Millisecond) //FIXME: dirty
+
+	go ProcessMessages(log, PREAMBLE, consumer, &outBuf, &wg)
+	ProduceBits(log, &inBuf, consumer, &wg)
+
 	wg.Wait()
 
 	if outBuf.String() != expected {
@@ -67,8 +70,8 @@ func TestBasicInputMessageWithExtraTrailingCharacters(t *testing.T) {
 	consumer := make(chan byte, 16) // buffered channel size 16
 	var wg sync.WaitGroup
 	inBuf.Write(input)
-	go Listen(PREAMBLE, log, &inBuf, &outBuf, consumer, &wg)
-	<-time.After(500 * time.Millisecond) //FIXME: dirty
+	go ProcessMessages(log, PREAMBLE, consumer, &outBuf, &wg)
+	ProduceBits(log, &inBuf, consumer, &wg)
 	wg.Wait()
 
 	if outBuf.String() != expected {
@@ -88,8 +91,8 @@ func TestBasicInputWithMultipleMessages(t *testing.T) {
 	consumer := make(chan byte, 16) // buffered channel size 16
 	var wg sync.WaitGroup
 	inBuf.Write(input)
-	go Listen(PREAMBLE, log, &inBuf, &outBuf, consumer, &wg)
-	<-time.After(500 * time.Millisecond) //FIXME: dirty
+	go ProcessMessages(log, PREAMBLE, consumer, &outBuf, &wg)
+	ProduceBits(log, &inBuf, consumer, &wg)
 	wg.Wait()
 
 	if outBuf.String() != expected {
@@ -109,8 +112,8 @@ func TestMisalignedInputMessage(t *testing.T) {
 	consumer := make(chan byte, 16) // buffered channel size 16
 	var wg sync.WaitGroup
 	inBuf.Write(input)
-	go Listen(PREAMBLE, log, &inBuf, &outBuf, consumer, &wg)
-	<-time.After(500 * time.Millisecond) //FIXME: dirty
+	go ProcessMessages(log, PREAMBLE, consumer, &outBuf, &wg)
+	ProduceBits(log, &inBuf, consumer, &wg)
 	wg.Wait()
 
 	if outBuf.String() != expected {
@@ -130,8 +133,8 @@ func TestNestedMessages(t *testing.T) {
 	consumer := make(chan byte, 16) // buffered channel size 16
 	var wg sync.WaitGroup
 	inBuf.Write(input)
-	go Listen(PREAMBLE, log, &inBuf, &outBuf, consumer, &wg)
-	<-time.After(500 * time.Millisecond) //FIXME: dirty
+	go ProcessMessages(log, PREAMBLE, consumer, &outBuf, &wg)
+	ProduceBits(log, &inBuf, consumer, &wg)
 	wg.Wait()
 
 	if outBuf.String() != expected {
@@ -151,8 +154,8 @@ func TestPartialPreambleInput(t *testing.T) {
 	consumer := make(chan byte, 16) // buffered channel size 16
 	var wg sync.WaitGroup
 	inBuf.Write(input)
-	go Listen(PREAMBLE, log, &inBuf, &outBuf, consumer, &wg)
-	<-time.After(500 * time.Millisecond) //FIXME: dirty
+	go ProcessMessages(log, PREAMBLE, consumer, &outBuf, &wg)
+	ProduceBits(log, &inBuf, consumer, &wg)
 	wg.Wait()
 
 	if outBuf.String() != expected {
@@ -172,8 +175,8 @@ func TestMultipleMessages(t *testing.T) {
 	consumer := make(chan byte, 16) // buffered channel size 16
 	var wg sync.WaitGroup
 	inBuf.Write(input)
-	go Listen(PREAMBLE, log, &inBuf, &outBuf, consumer, &wg)
-	<-time.After(500 * time.Millisecond) //FIXME: dirty
+	go ProcessMessages(log, PREAMBLE, consumer, &outBuf, &wg)
+	ProduceBits(log, &inBuf, consumer, &wg)
 	wg.Wait()
 
 	if outBuf.String() != expected {
@@ -185,7 +188,8 @@ func TestMultipleMessages(t *testing.T) {
 	expected = "blahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblah"
 
 	inBuf.Write(input)
-	<-time.After(500 * time.Millisecond) //FIXME: dirty
+	ProduceBits(log, &inBuf, consumer, &wg)
+
 	wg.Wait()
 	if outBuf.String() != expected {
 		t.Errorf("result was incorrect, got: %v, want: %v", outBuf.String(), expected)
@@ -204,8 +208,8 @@ func TestMultipleMessagesMidMessage(t *testing.T) {
 	consumer := make(chan byte, 16) // buffered channel size 16
 	var wg sync.WaitGroup
 	inBuf.Write(input)
-	go Listen(PREAMBLE, log, &inBuf, &outBuf, consumer, &wg)
-	<-time.After(500 * time.Millisecond) //FIXME: dirty
+	go ProcessMessages(log, PREAMBLE, consumer, &outBuf, &wg)
+	ProduceBits(log, &inBuf, consumer, &wg)
 	wg.Wait()
 
 	if outBuf.String() != expected {
@@ -217,7 +221,7 @@ func TestMultipleMessagesMidMessage(t *testing.T) {
 
 	inBuf.Write(input)
 
-	<-time.After(500 * time.Millisecond) //FIXME: dirty
+	ProduceBits(log, &inBuf, consumer, &wg)
 	wg.Wait()
 	if outBuf.String() != expected {
 		t.Errorf("result was incorrect, got: %v, want: %v", outBuf.String(), expected)
