@@ -36,14 +36,18 @@ Develop an application that:
   - not doing this appears to require system calls to solve the issue since stdin is line buffered by default
   - additionally, if system calls are used, docker will not be as handy due to the fact that it does not simulate the kernel and different systems will need different headers packaged in to work at all
   - as can be seen from the tests, using a stream will get around this limitation and the program will work in this case
-- Input is an element of the set {"0","1"} in ASCII and EOF will signal the end of the program
-- If the input is CAPTIVATION followed by less than 100 decoded ASCII characters, we will still print out the 100> characters and wait for more
+- Input is an element of the set {"0","1"} in ASCII
+- If the input is CAPTIVATION followed by less than 100 decoded ASCII characters, we will still print out the 100> decoded characters and wait for more
 - If multiple CAPTIVATION preambles are found within one another, then the program will print out messages from both concurrently:
   - if we see `CAPTIVATIONblahCAPTIVATIONblahblah...`
   - the output will be `blahCAPTIVATIONbbllaahhbbllaahh...` it will not wait for one message to play before beginning the next message as reflected in the tests
 - 0's and 1's are UTF-8
 
 ## How to run the code locally
+
+setting up `GOPATH`
+
+- the code is expected to be in: `$GOPATH/src/github.com/pt-arvind/DeveloperChallenge` (hereby referred to as the root directory) failing to adhere to this may cause compiler issues
 
 - from the root directory, type:
 
