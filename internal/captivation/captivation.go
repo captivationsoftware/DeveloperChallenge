@@ -21,10 +21,7 @@ func Listen(preamble string, log *logger.LogWrapper, input io.Reader, output io.
 		// assuming UTF-8
 		b, err := inbuf.ReadByte()
 		log.Printf("buffer size: %v remaining: %v", inbuf.Size(), inbuf.Buffered())
-		if err == io.EOF {
-			log.Printf("terminating program due to EOF")
-			break
-		} else if err != nil {
+		if err != nil {
 			log.Printf("%+v", fmt.Errorf("received error while reading in the next byte: %+v", err))
 			continue
 		} else if string(b) != "1" && string(b) != "0" {
@@ -47,6 +44,8 @@ func ScanForMessages(log *logger.LogWrapper, preamble string, input chan byte, o
 	printers := []*MessagePrinter{}
 
 	for {
+		// could use anonymous function here
+
 		log.Printf("waiting on next byte...")
 		log.Printf("input size: %v", len(input))
 		b := <-input // read next byte
