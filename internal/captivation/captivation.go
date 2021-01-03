@@ -5,43 +5,58 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"sync"
 
 	"github.com/pt-arvind/DeveloperChallenge/internal/logger"
 )
 
-//TODO: use channels to properly keep the program running if the buffer keeps being written to
-// function should take in a channel, wait on byte, then do everything else as it already does
-// in a wrapper function, we set up the channel and just wait for input, similar to what we've got here, as soon as input comes in
-// it is written to this channel and continues on?
+// Listen begins listening for user input
+func Listen(preamble string, log *logger.LogWrapper, input io.Reader, output io.Writer, consumer chan byte, wg *sync.WaitGroup) {
+	// run the consumer on a separate goroutine
+	go ScanForMessages(log, preamble, consumer, output, wg)
 
-// ScanForMessages scans the input stream for message bytes in a loop until the EOF character is presented
-func ScanForMessages(log *logger.LogWrapper, preamble string, input io.Reader, inputBufferSizeInBytes int, output io.Writer) {
-	log.Printf("starting scan with buf size: %v in bytes", inputBufferSizeInBytes)
-	inbuf := bufio.NewReaderSize(input, inputBufferSizeInBytes) // limit buffer size so we can test more easily
-
-	l := len(preamble)
-	log.Printf("preamble length: %v", l)
-	window := make([]byte, 0, l) // extra rune's worth
-	printers := []*MessagePrinter{}
-
+	// start the producer on the main thread
+	inbuf := bufio.NewReaderSize(input, 16)
 	for {
 		// assuming UTF-8
-		r, err := inbuf.ReadByte()
+		b, err := inbuf.ReadByte()
 		log.Printf("buffer size: %v remaining: %v", inbuf.Size(), inbuf.Buffered())
 		if err == io.EOF {
-			log.Printf("terminating program")
+			log.Printf("terminating program due to EOF")
 			break
 		} else if err != nil {
 			log.Printf("%+v", fmt.Errorf("received error while reading in the next byte: %+v", err))
+			continue
+		} else if string(b) != "1" && string(b) != "0" {
+			// this is a handy check for local testing where stdout and stdin start to pour into one another
+			log.Printf("input should only ever be 0 or 1, can't send in: %v\n", string(b))
+			continue
 		}
 
-		// print rune if we're supposed to
+		// send byte to the consumer queue
+		wg.Add(1)
+		consumer <- b
+	}
+}
+
+// ScanForMessages scans the input stream for message bytes in a loop until the EOF character is presented
+func ScanForMessages(log *logger.LogWrapper, preamble string, input chan byte, output io.Writer, wg *sync.WaitGroup) {
+	preambleLength := len(preamble)
+	log.Printf("preamble length: %v", preambleLength)
+	window := make([]byte, 0, preambleLength) // capacity is the length of the preamble
+	printers := []*MessagePrinter{}
+
+	for {
+		log.Printf("waiting on next byte...")
+		log.Printf("input size: %v", len(input))
+		b := <-input // read next byte
+
+		// print byte if we're supposed to
 		// prints could be at different byte lengths
-		// each one needs to trigger its own function
 		filteredPrinters := printers[:0] // used to filter out completed printers in place so we don't keep allocating more space
 		for _, p := range printers {
 			if p.NumCharsLeftToPrint > 0 {
-				p.Fprint(r, log, output)
+				p.Fprint(b, log, output)
 			}
 			if p.NumCharsLeftToPrint > 0 {
 				filteredPrinters = append(filteredPrinters, p)
@@ -49,14 +64,15 @@ func ScanForMessages(log *logger.LogWrapper, preamble string, input io.Reader, i
 		}
 		printers = filteredPrinters
 
-		if len(window) < l-1 { // if the window is less than the size of the preamble-1, then we need to continue
-			window = append(window, r)
+		if len(window) < preambleLength-1 { // if the window is less than the size of the preamble-1, then we need to continue
+			window = append(window, b)
+			wg.Done() // FIXME: refactor this so that we can defer the wg.Done()
 			continue
-		} else if len(window) >= l { // in this case, window >= length(preamble)
+		} else if len(window) >= preambleLength { // in this case, window >= length(preamble)
 			// rotate window
 			window = window[1:]
 		}
-		window = append(window, r)
+		window = append(window, b)
 		curr := string(window)
 
 		i := strings.Index(curr, preamble)
@@ -71,5 +87,7 @@ func ScanForMessages(log *logger.LogWrapper, preamble string, input io.Reader, i
 			}
 			printers = append(printers, &p)
 		}
+
+		wg.Done()
 	}
 }

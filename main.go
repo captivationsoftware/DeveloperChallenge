@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"sync"
 
 	"github.com/pt-arvind/DeveloperChallenge/internal/captivation"
 	"github.com/pt-arvind/DeveloperChallenge/internal/logger"
@@ -14,7 +15,8 @@ const PREAMBLE = "01000011010000010101000001010100010010010101011001000001010101
 const InputBufferSize = 32
 
 func main() {
-	l := &logger.LogWrapper{DebugMode: false}
-
-	captivation.ScanForMessages(l, PREAMBLE, os.Stdin, InputBufferSize, os.Stdout)
+	var wg sync.WaitGroup
+	log := &logger.LogWrapper{DebugMode: false}
+	consumer := make(chan byte, 16) // buffered channel size 16
+	captivation.Listen(PREAMBLE, log, os.Stdin, os.Stdout, consumer, &wg)
 }
