@@ -28,9 +28,10 @@ This is my (Eric Luo) submission for the Captivation Software coding challenge.
 
 In order to run properly, this code needs to run on a Unix Operating system, or any system that can utilize 'stty'. 
 to run:
-
-Javac challenge.java
+```
+javac challenge.java
 java challenge
+```
 
 ## Troubleshooting
 
