@@ -19,3 +19,19 @@ Develop an application that:
 - Your solution should include instructions on how to run/build via Linux command line (or even better, use Docker)
 - Your solution will be judged for correctness, performance, and style
 - You may use any language you'd like, but you can only use standard libraries
+
+# README 
+
+This is my (Eric Luo) submission for the Captivation Software coding challenge. 
+
+## Usage
+
+In order to run properly, this code needs to run on a Unix Operating system, or any system that can utilize 'stty'. 
+to run:
+
+Javac challenge.java
+java challenge
+
+## Troubleshooting
+
+For this to be operational, it requires the usage of stty to have an unbuffered input flow. Although there is a shutdown hook to revert, doing 'stty cooked' will revert back to a buffered input stream.
