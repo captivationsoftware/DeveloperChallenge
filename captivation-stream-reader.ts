@@ -7,15 +7,22 @@ export default class CaptivationStreamReader {
 
     /**
      * Decodes a binary string 
-     * @param encodedStream 
+     * @param input Input String to be decoded from binary 
      */
-    decode(str: string) {
-        var binString = '';
+    decode(input: string) {
+        let bytesLeft = input;
+        let result = '';
 
-        str.split(' ').map(function (bin) {
-            binString += String.fromCharCode(parseInt(bin, 2));
-        });
-        return binString;
+        // Check if we have some bytes left
+        while (bytesLeft.length) {
+            // Get the first digits
+            const byte = bytesLeft.substr(0, 8);
+            bytesLeft = bytesLeft.substr(8);
+
+            result += String.fromCharCode(parseInt(byte, 2));
+        }
+
+        return result;
     }
 
     /**
