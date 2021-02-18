@@ -1,6 +1,6 @@
 # Author: Connor Graff
 # Date: 2/18/2021
-# Purpose: This program will find CAPTIVATION in a series of 1's and 0's
+# Purpose: This program will find CAPTIVATION in a series of 1's and 0's and print the next 100 bits
 
 import sys
 # Import regular expressions
