@@ -24,13 +24,13 @@ def main():
         if (x and len(x) > 1):
             # Create a for loop to go through each one of the matches by index
             for i in range(len(x)):
-                # If the ith index of x exists, and the ith index has a legnth of 100
+                # If the ith index of x exists, and the ith index has a length of 100
                 if (x[i] and len(x[i]) == 100):
                     # Print the 100 bits out
                     sys.stdout.write(x[0])
                     break
             break
-        # Else if x exists, and the length of x is 1 (There was one match), and the 0th index of x exists, and the 0th index has a legnth of 100
+        # Else if x exists, and the length of x is 1 (There was one match), and the 0th index of x exists, and the 0th index has a length of 100
         elif(x and len(x) == 1 and x[0] and len(x[0]) == 100):
             # Print the 100 bits out
             sys.stdout.write(x[0])
