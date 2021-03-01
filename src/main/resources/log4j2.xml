@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- the following status is for Log4J info or debug -->
+<Configuration status="INFO" strict="true">
+    <Properties>
+        <Property name="log-path">logs/</Property>
+        <Property name="log-name">FindCaptivation</Property>
+    </Properties>
+    <Appenders>
+        <RollingRandomAccessFile name="RollingFile" fileName="${log-path}/${log-name}.log"
+                     filePattern="${log-path}/${log-name}-%d{yyyy-MM-dd}-%i.log">
+
+            <PatternLayout>
+                <pattern>%d{dd/MMM/yyyy HH:mm:ss,SSS}- %c{1}: %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <OnStartupTriggeringPolicy/>
+            </Policies>
+
+            <DefaultRolloverStrategy max="4"/>
+
+        </RollingRandomAccessFile>
+    </Appenders>
+    <Loggers>
+        <Logger name="rolling" level="info" additivity="false">
+            <appender-ref ref="RollingFile" level="debug"/>
+        </Logger>
+        <Root level="debug" additivity="false">
+            <AppenderRef ref="RollingFile"/>
+        </Root>
+    </Loggers>
+</Configuration>
