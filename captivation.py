@@ -10,9 +10,10 @@ import sys
 
 CAPTIVATION = '0100001101000001010100000101010001001001010101100100000101010100010010010100111101001110'
 
+
 def print_next_100(temp):
     """Print the decoded message.
-    
+
     Decodes the next 100 'bits' from stdin, decodes them, and prints
     to stdout the decoded message.
     """
@@ -25,36 +26,24 @@ def print_next_100(temp):
             temp = temp[1:]
         if (len(my_string) % 8 == 0):
             test_string = int(my_string[-8:], 2)
-            test_string = test_string.to_bytes((test_string.bit_length() + 7 // 8), 'big').decode()
-            decoded_string += test_string
+            decoded_string += chr(test_string)
 
-    while len(my_string) < 100:
-        try:
-            temp = input()
-        except EOFError as error:
-            print("Error: ", error)
-
-        while(temp and len(my_string) < 100):
-            my_string += temp[0]
-            if temp:
-                temp = temp[1:]
-            if (len(my_string) % 8 == 0):
-                test_string = int(my_string[-8:], 2)
-                test_string = test_string.to_bytes((test_string.bit_length() + 7 // 8), 'big').decode()
-                decoded_string += test_string
-    
     print(decoded_string)
+    return temp
+
 
 def main():
     """Reads input from stdin and searches for the preamble 'CAPTIVATION' in
     in the decoded input string. When found, calls the print_next_100 function.
     Runs forever until keyboard interrupt."""
     u_input = ''
+    temp = str()
     while True:
-        try:
-            temp = input()
-        except EOFError as error:
-            print("Error: ", error)
+        if not temp:
+            try:
+                temp = sys.stdin.read()
+            except EOFError as error:
+                print("Error: ", error)
 
         while(temp and len(u_input) < 88):
             u_input += temp[0]
@@ -63,17 +52,16 @@ def main():
 
         if(len(u_input) == 88):
             if (u_input == CAPTIVATION):
-                print_next_100(temp)
-                u_input = ''
-            else:
-                while temp:
-                    u_input = u_input[1:]
-                    u_input += temp[0]
-                    if (u_input == CAPTIVATION):
-                        print_next_100(temp)
-                        u_input = ''
-                    if temp:
-                        temp = temp[1:]
+                temp = print_next_100(temp)
+            while temp:
+                u_input = u_input[1:]
+                u_input += temp[0]
+                if temp:
+                    temp = temp[1:]
+                if (u_input == CAPTIVATION):
+                    temp = print_next_100(temp)
+        u_input = ''
+
 
 if __name__ == '__main__':
     main()
