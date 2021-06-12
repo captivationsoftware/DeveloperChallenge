@@ -24,19 +24,19 @@ stdin.on("data", processChunk);
 function processChunk(chunk) {
   stdin.pause();
 
-  const preambleStartIndex = chunk.indexOf(preambleAsBitsString);
+  let preambleStartIndex = chunk.indexOf(preambleAsBitsString);
 
-  if (preambleStartIndex === -1) return;
+  while (preambleStartIndex !== -1) {
+    const messageStartInd = preambleStartIndex + preambleAsBitsString.length;
+    const messageEndInd = messageStartInd + MESSAGE_TARGET_LENGTH;
 
-  const messageStartInd = preambleStartIndex + preambleAsBitsString.length;
-  const messageEndInd = messageStartInd + MESSAGE_TARGET_LENGTH;
+    let messageBits = chunk.substring(messageStartInd, messageEndInd);
 
-  let messageBits = chunk.substring(messageStartInd, messageEndInd);
-  // print the frist message
-  process.stdout.write(asciiBitsToString(messageBits));
+    process.stdout.write(asciiBitsToString(messageBits));
 
-  //recursively check the rest of the string
-  processChunk(chunk.substring(messageEndInd));
+    preambleStartIndex = chunk.indexOf(preambleAsBitsString, messageEndInd);
+  }
+
   stdin.resume();
 }
 
