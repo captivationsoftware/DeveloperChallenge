@@ -1,9 +1,3 @@
-const stdin = process.stdin;
-
-const preamble = "CAPTIVATION";
-const preambleAsBitsString = stringToAsciiBits(preamble);
-const MESSAGE_TARGET_LENGTH = 100 * 8;
-
 /*
 Approach:
 - Read in a chunk from stdin stream (unknown size - entire stream could be large and will be broken up into manageable chunks)
@@ -12,11 +6,18 @@ Approach:
 - If chunk does not contain the preamble, the end of it this chunk could be paired with the beginning of the next chunk to create the full preamble. Save the last preableLength of characters and append it to the beginning of the next chunk
 */
 
+const stdin = process.stdin;
+const stdout = process.stdout;
+
+const preamble = "CAPTIVATION";
+const preambleAsBitsString = stringToAsciiBits(preamble);
+const MESSAGE_TARGET_LENGTH = 100 * 8;
+
 // stdin will be a string instead of a Buffer
 stdin.setEncoding("utf8");
 
 let previousChunk = "";
-let sizeMessageRemainingToPrint = 0;
+let sizeOfMessageRemainingToPrint = 0;
 
 stdin.on("data", processChunk);
 
@@ -24,17 +25,54 @@ stdin.on("data", processChunk);
 function processChunk(chunk) {
   stdin.pause();
 
-  let preambleStartIndex = chunk.indexOf(preambleAsBitsString);
+  let startSearchIndex = 0;
+  chunk = previousChunk + chunk;
+
+  if (sizeOfMessageRemainingToPrint > 0) {
+    const previousMessageToPrint = chunk.substring(
+      0,
+      sizeOfMessageRemainingToPrint
+    );
+
+    stdout.write(asciiBitsToString(previousMessageToPrint));
+
+    // probably always 0. Chunk is probably alway bigger than a message
+    sizeOfMessageRemainingToPrint = Math.max(
+      0,
+      MESSAGE_TARGET_LENGTH - previousMessageToPrint.length
+    );
+
+    startSearchIndex = previousMessageToPrint.length;
+  }
+
+  let preambleStartIndex = chunk.indexOf(
+    preambleAsBitsString,
+    startSearchIndex
+  );
 
   while (preambleStartIndex !== -1) {
     const messageStartInd = preambleStartIndex + preambleAsBitsString.length;
-    const messageEndInd = messageStartInd + MESSAGE_TARGET_LENGTH;
+    let messageEndInd = Math.min(
+      messageStartInd + MESSAGE_TARGET_LENGTH,
+      chunk.length
+    );
+
+    if ((messageEndInd - messageStartInd) % 8 !== 0) {
+      messageEndInd = (messageEndInd - messageStartInd) % 8;
+    }
 
     let messageBits = chunk.substring(messageStartInd, messageEndInd);
+    previousChunk = chunk.substring(messageEndInd);
 
-    process.stdout.write(asciiBitsToString(messageBits));
+    sizeOfMessageRemainingToPrint = MESSAGE_TARGET_LENGTH - messageBits.length;
+
+    stdout.write(asciiBitsToString(messageBits));
 
     preambleStartIndex = chunk.indexOf(preambleAsBitsString, messageEndInd);
+  }
+
+  if (sizeOfMessageRemainingToPrint === 0) {
+    previousChunk = chunk.substring(chunk.length - preambleAsBitsString.length);
   }
 
   stdin.resume();
