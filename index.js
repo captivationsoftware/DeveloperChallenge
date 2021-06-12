@@ -1,81 +1,69 @@
 /*
 Approach:
-- Read in a chunk from stdin stream (unknown size - entire stream could be large and will be broken up into manageable chunks)
+- Read in a chunk from process.stdin stream (unknown size - entire stream could be large and will be broken up into manageable chunks)
 - If chunk contains the preamble and has enough length for the full emssage, print next 100 characters. Then search for the preamble with the reminder of the chunk
 - If chunk contains the preamble but does not have enough length for the full message, print X character (where X is message size available), then print 100-X of next chunk. Then search where we left off
-- If chunk does not contain the preamble, the end of it this chunk could be paired with the beginning of the next chunk to create the full preamble. Save the last preableLength of characters and append it to the beginning of the next chunk
+- If chunk does not contain the preamble, the end of this chunk could be paired with the beginning of the next chunk to create the full preamble. Save the last preambleLength characters and append it to the beginning of the next chunk
 */
 
-const stdin = process.stdin;
-const stdout = process.stdout;
-
 const preamble = "CAPTIVATION";
-const preambleAsBitsString = stringToAsciiBits(preamble);
-const MESSAGE_TARGET_LENGTH = 100 * 8;
+const preambleAsBits = stringToAsciiBits(preamble);
+const MESSAGE_BITS_TARGET_LENGTH = 100 * 8;
 
-// stdin will be a string instead of a Buffer
-stdin.setEncoding("utf8");
+// process.stdin will be a string instead of a Buffer
+process.stdin.setEncoding("utf8");
 
 let previousChunk = "";
-let sizeOfMessageRemainingToPrint = 0;
+let sizeRemainingToPrint = 0;
 
-stdin.on("data", processChunk);
+process.stdin.on("data", processChunk);
 
 // (chunk: string) -> void
 function processChunk(chunk) {
-  stdin.pause();
+  process.stdin.pause();
 
   let startSearchIndex = 0;
   chunk = previousChunk + chunk;
 
-  if (sizeOfMessageRemainingToPrint > 0) {
-    const previousMessageToPrint = chunk.substring(
-      0,
-      sizeOfMessageRemainingToPrint
-    );
-
-    stdout.write(asciiBitsToString(previousMessageToPrint));
-
-    // probably always 0. Chunk is probably alway bigger than a message
-    sizeOfMessageRemainingToPrint = Math.max(
-      0,
-      MESSAGE_TARGET_LENGTH - previousMessageToPrint.length
-    );
-
+  if (sizeRemainingToPrint > 0) {
+    const previousMessageToPrint = chunk.substring(0, sizeRemainingToPrint);
+    process.stdout.write(asciiBitsToString(previousMessageToPrint));
+    sizeRemainingToPrint = 0; // Chunk size is always bigger than a message
     startSearchIndex = previousMessageToPrint.length;
   }
 
-  let preambleStartIndex = chunk.indexOf(
-    preambleAsBitsString,
-    startSearchIndex
-  );
+  let preambleStartIndex = chunk.indexOf(preambleAsBits, startSearchIndex);
+
+  let messageEndInd = 0;
 
   while (preambleStartIndex !== -1) {
-    const messageStartInd = preambleStartIndex + preambleAsBitsString.length;
-    let messageEndInd = Math.min(
-      messageStartInd + MESSAGE_TARGET_LENGTH,
+    const messageStartInd = preambleStartIndex + preambleAsBits.length;
+    messageEndInd = Math.min(
+      messageStartInd + MESSAGE_BITS_TARGET_LENGTH,
       chunk.length
     );
 
+    // Ensure we don't print less than 8 bits (a single UTF-8 char). In manual testing seems chunks are always multiples of 8, so probably unnecessary.
     if ((messageEndInd - messageStartInd) % 8 !== 0) {
-      messageEndInd = (messageEndInd - messageStartInd) % 8;
+      messageEndInd -= (messageEndInd - messageStartInd) % 8;
     }
 
     let messageBits = chunk.substring(messageStartInd, messageEndInd);
+    process.stdout.write(asciiBitsToString(messageBits));
+
+    sizeRemainingToPrint = MESSAGE_BITS_TARGET_LENGTH - messageBits.length;
+    preambleStartIndex = chunk.indexOf(preambleAsBits, messageEndInd);
+  }
+
+  if (sizeRemainingToPrint === 0) {
+    // add end of this chunk to beginning of next if searching for preamble
+    previousChunk = chunk.substring(chunk.length - preambleAsBits.length);
+  } else {
+    // add end of this chunk to beginning of next if writing and the message was not divisble by 8
     previousChunk = chunk.substring(messageEndInd);
-
-    sizeOfMessageRemainingToPrint = MESSAGE_TARGET_LENGTH - messageBits.length;
-
-    stdout.write(asciiBitsToString(messageBits));
-
-    preambleStartIndex = chunk.indexOf(preambleAsBitsString, messageEndInd);
   }
 
-  if (sizeOfMessageRemainingToPrint === 0) {
-    previousChunk = chunk.substring(chunk.length - preambleAsBitsString.length);
-  }
-
-  stdin.resume();
+  process.stdin.resume();
 }
 
 // (s: string) -> string
