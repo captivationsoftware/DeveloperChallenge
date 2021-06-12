@@ -6,6 +6,8 @@ Approach:
 - If chunk does not contain the preamble, the end of this chunk could be paired with the beginning of the next chunk to create the full preamble. Save the last preambleLength characters and append it to the beginning of the next chunk
 */
 
+const { stringToAsciiBits, writeBits } = require("./utils");
+
 const preamble = "CAPTIVATION";
 const preambleAsBits = stringToAsciiBits(preamble);
 const MESSAGE_BITS_TARGET_LENGTH = 100 * 8;
@@ -16,10 +18,7 @@ process.stdin.setEncoding("utf8");
 let previousChunk = "";
 let sizeRemainingToPrint = 0;
 
-process.stdin.on("data", processChunk);
-
-// (chunk: string) -> void
-function processChunk(chunk) {
+process.stdin.on("data", function processChunk(chunk) {
   process.stdin.pause();
 
   let startSearchIndex = 0;
@@ -27,13 +26,12 @@ function processChunk(chunk) {
 
   if (sizeRemainingToPrint > 0) {
     const previousMessageToPrint = chunk.substring(0, sizeRemainingToPrint);
-    process.stdout.write(asciiBitsToString(previousMessageToPrint));
+    writeBits(previousMessageToPrint);
     sizeRemainingToPrint = 0; // Chunk size is always bigger than a message
     startSearchIndex = previousMessageToPrint.length;
   }
 
   let preambleStartIndex = chunk.indexOf(preambleAsBits, startSearchIndex);
-
   let messageEndInd = 0;
 
   while (preambleStartIndex !== -1) {
@@ -49,7 +47,7 @@ function processChunk(chunk) {
     }
 
     let messageBits = chunk.substring(messageStartInd, messageEndInd);
-    process.stdout.write(asciiBitsToString(messageBits));
+    writeBits(messageBits);
 
     sizeRemainingToPrint = MESSAGE_BITS_TARGET_LENGTH - messageBits.length;
     preambleStartIndex = chunk.indexOf(preambleAsBits, messageEndInd);
@@ -64,23 +62,4 @@ function processChunk(chunk) {
   }
 
   process.stdin.resume();
-}
-
-// (s: string) -> string
-function stringToAsciiBits(s) {
-  const acsiiArr = s
-    .split("")
-    .map((letter) => letter.charCodeAt(0).toString(2).padStart(8, "0"));
-
-  return acsiiArr.join("");
-}
-
-// (s: string) -> string
-function asciiBitsToString(s) {
-  let messageStr = "";
-  for (let i = 0; i < s.length; i += 8) {
-    messageStr += String.fromCharCode(parseInt(s.substring(i, i + 8), 2));
-  }
-
-  return messageStr;
-}
+});
