@@ -1,4 +1,12 @@
-# Captivation Software Developer Challenge
+# Captivation Software Developer Challenge - Christian Burns
+
+## Installation Instructions
+
+> The minimum required versions of [Python](https://www.python.org/) are 2.6 and 3.0.
+
+You can check which version of Python you have installed via `python --version` or `python3 --version`.
+
+This application can then run via `python /path/to/submission.py` or `python3 /path/to/submission.py` correspondingly.
 
 ## Your Task
 Develop an application that:
