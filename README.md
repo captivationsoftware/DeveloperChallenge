@@ -20,3 +20,8 @@ Develop an application that:
 - Your solution will be judged for correctness, performance, and style
 - You may use any language you'd like, but you can only use standard libraries
 - Your solution must be your own original work
+
+## Build & Run Instructions
+- Ensure the openJDK 8 is installed
+- In the directory where the Decoder.java file is, run "javac Decoder.java" in a terminal to compile the class
+- In the same directory run "java Decoder" to execute the app.
